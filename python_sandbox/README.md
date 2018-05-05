@@ -27,7 +27,7 @@ tar xvfz virtualenv-15.1.0.tar.gz
 
 where `~/path` indicates the path to the python you wish to be associated with the environment.  The above commands will create the directory `~/.virtual_envs/warp` and a bunch of materials therein.
 
-## Tips for Windows 10 users:
+### Tips for Windows 10 users:
 For some Windows 10 users, `tar xvfz virtualenv-15.1.0.tar.gz` may fail. You can then just follow that first instruction online to install virtualenv,
 ```bash
 pip install virtualenv
