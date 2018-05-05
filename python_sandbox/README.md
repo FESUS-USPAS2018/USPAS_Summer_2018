@@ -28,18 +28,11 @@ tar xvfz virtualenv-15.1.0.tar.gz
 where `~/path` indicates the path to the python you wish to be associated with the environment.  The above commands will create the directory `~/.virtual_envs/warp` and a bunch of materials therein.
 
 ## Tips for Windows 10 users:
-If in Step 3,
-```bash
-tar xvfz virtualenv-15.1.0.tar.gz
-```
-failed, you can just follow that first instruction online to install virtualenv,
+For some Windows 10 users, `tar xvfz virtualenv-15.1.0.tar.gz` may fail. You can then just follow that first instruction online to install virtualenv,
 ```bash
 pip install virtualenv
 ```
-and then
-```bash
-virtualenv warp
-```
+and then `virtualenv warp` to get the job done.
 
 # Turning the sandbox on and off: 
   ## On 
