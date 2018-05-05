@@ -3,6 +3,12 @@ The installation instructions for Warp are [here](http://warp.lbl.gov/home/how-t
 
 Make sure to follow these with your sandbox turned on (`source ~/.virtual_envs/warp/bin/activate`).  As you already should have numpy and Forthon, you need not follow those portions of the instructions.  Also, you need not do the complicated parallel installation instructions, and stop after installing pygist.  
 
+### Tips for Windows 10 users
+To install X11 devel package for pygist in WSL:
+1. Install X11 for windows, e.g. Xming, VcXsrv ...
+2. Launch X11
+3. In your WSL, `sudo apt-get install libx11-dev`
+
 # Testing
 Next, go to the bottom of the installation instruction page and follow the instructions for running the tests.  When I ran the tests, I got one error in pyelem_test.py.  However, my warp runs fine.
 
