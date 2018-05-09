@@ -1,0 +1,3 @@
+The files contained in this directory are text files to keep parameters for different column elements like conductors or electric fields.  I copied my repository over, but we will not be using all of these in the course.  In fact, I will probably be removing the ones we are not using (pretty much all of them) so that by the time the course rolls around, only relevant configs are present.  
+
+However, if you need to get pre-approval to install anything, you may want to discuss these configs.  I can't imagine anyone will have a problem with files that keep parameters, but they are here to view if you need to.
