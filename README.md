@@ -32,7 +32,7 @@ For government employees --- if this is an issue, let us know.
 As maintaining multiple scripts that differ only by parameters, we have built the warp_modules on top of an app we built that
 allows you to store element parameters separately from a *Warp* file.  This is effectively what config2class does, i.e. 
 it reads in configuration files, creates, and populates the python objects.  Also, it creates template files to fill 
-from the objects you request.  A little more about this can be found [here][here](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/tree/master/config2class).  Some pre-populated configuration files can be found [here](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/tree/master/warp_configs).
+from the objects you request.  A little more about this can be found [here](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/tree/master/config2class).  Some pre-populated configuration files can be found [here](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/tree/master/warp_configs).
 
 # Contact Information
 You may run into issues during installation, or you may have other concerns.  Please feel free to email us at:
