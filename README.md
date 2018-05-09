@@ -23,5 +23,7 @@ You can find the N-partice simulation code we are going to use [here](https://gi
 
 # Contact Information
 Please feel free to email us at:
+
 Brandon Zerbe: 
+
 Xukun Xiang: xiangxuk@msu.edu
