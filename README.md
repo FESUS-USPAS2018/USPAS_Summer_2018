@@ -7,10 +7,10 @@ In this summer course, we will be working with
 Here is the instructions on software installation to be completed before coming to the course.
 
 # Get a Linux environment (Windows Users only):
-Since *Warp* only supports Linux and Mac OS, Windows users need to construct a Linux environment first. For Windows 10 users, please check out the folder [Setup_for_Windows](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/blob/master/Setup_for_Windows) for further instructions. 
+Since *Warp* only supports Linux and Mac OS, Windows users need to construct a Linux environment first. For Windows users, please check out the folder [Setup_for_Windows](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/blob/master/Setup_for_Windows) for further instructions. 
 
 # Python preparation:
-Once yoy have a Linux/MacOS environment, you need to install necessary libraries/packages/modules.  Directions setting up an isolated "sandbox" can be found  
+Once you have a Linux/MacOS environment, you need to install necessary libraries/packages/modules.  Directions setting up an isolated "sandbox" can be found  
 [here](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/tree/master/python_sandbox) is some instructions and tips.  We will use this environment both for running *Warp* as well as running our own scripts.
 
 # Install *Warp*
