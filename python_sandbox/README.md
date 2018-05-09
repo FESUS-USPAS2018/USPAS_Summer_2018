@@ -34,7 +34,7 @@ pip install virtualenv
 ```
 and then `virtualenv warp` to get the job done.
 
-# [Turning the sandbox on and off:](#onoff) 
+# Turning the sandbox on and off:
   ## On 
   ```source ~/.virtual_envs/warp/bin/activate```  
   ## Off 
