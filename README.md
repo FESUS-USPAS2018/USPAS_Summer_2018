@@ -23,7 +23,7 @@ One of the central codes we will discuss in the course will be a python script t
 You can find the N-partice simulation code we are going to use [here](https://github.com/FESUS-USPAS2018/USPAS_Summer_2018/tree/master/N_Particle_simulation). Since we've already installed a FORTRAN compiler during *Warp* installation, such as *gfortran*, no extra preparation is needed at this point.
 
 # Warp supporting python modules
-*Warp* is a framework that provides access to Fortran-based PIC simulations.  While working with the *Warp*, we have built tools that streamline some central functions.  We probably will not use all of these tools, but we will definitely use some of them.  We have made our scripts available to all here.  To be able to access these modules, you need to be able to modify your python path variable, i.e. 
+*Warp* is a framework that provides access to Fortran-based PIC simulations.  While working with the *Warp*, we have built tools that streamline some central functions.  We probably will not use all of these tools, but we will definitely use some of them.  We have made our scripts available to all here.  To be able to access these modules, you first need to download them and then you need to be able to modify your python path variable, i.e. 
 ```
 export PYTHONPATH=$PYTHONPATH:/path/to/warp_modules/:/path/to/config2class/src
 ```  
