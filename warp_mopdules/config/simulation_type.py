@@ -1,0 +1,64 @@
+import numpy as np
+from warp import *
+from warp.init_tools import initialize_em_solver, set_smoothing_parameters
+
+def get_mesh_symmetry_factor(simtype,top,w3d):
+  """
+  Gets the symmetry factor based on the simulation type
+  and the parameters stored in the w3d object.
+  Args:
+    simtype: The type of simulation.  Supports "w3d" and "wrz" currently.
+    top: The top object from warp.
+    w3d: The w3d object from warp.
+  Return value:
+    symmetry_factor: either 1 or 2.
+  """
+  if simtype == "w3d":
+    if w3d.l4symtry: 
+      return 1
+    else:
+      return 2
+  elif simtype in ["wrz","em2d","wxy","em3d"]:
+    return 1 
+  raise Exception("Error: simtype not defined")
+
+def get_solver(simtype,top,w3d):
+  """
+  Gets the solver for the type of simulation we are running
+  and sets the appropriate attribute of the w3d object.
+  Args:
+    simtype: The type of simulation.  Supports "w3d" and "wrz" currently.
+    top: The top object from warp.
+    w3d: The w3d object from warp.
+  Return value:
+    solver: A solver object from warp.  Also, edits w3d in place.
+  """
+  if simtype == "w3d":
+    # --- 3D ES
+    return MRBlock3D()
+  elif simtype == "em3d":
+    npass_smooth = array([[ 0 , 0 ], [ 0 , 0 ], [ 1 , 1 ]])# Number of passes of smoother and compensator in each direction (x, y, z)
+    alpha_smooth = array([[ 0.5, 3./2], [ 0.5, 3./2], [0.5, 3./2]])# Smoothing coefficients in each direction (x, y, z)
+    stride_smooth = array([[ 1 , 1 ], [ 1 , 1 ], [1,1]])#Stride in each direction (x, y, z)
+    set_smoothing_parameters( 1, "circ", npass_smooth,
+                         alpha_smooth, stride_smooth )
+    return initialize_em_solver( 0, "circ",
+      npass_smooth, alpha_smooth, stride_smooth,circ_m=1)
+  elif simtype == "em2d":
+    w3d.solvergeom = w3d.RZgeom
+    return EM2D(l_2drz=True,
+                bounds=bounds,
+                stencil=1,
+                l_pushf=0,
+                l_setcowancoefs=1)
+  elif simtype == "wrz":
+    # r-z ES
+    w3d.solvergeom = w3d.RZgeom
+    return MRBlock2D()
+  elif simtype == "wxy":
+    # x-y 2 dimensional ES
+    w3d.solvergeom = w3d.XYgeom
+    return MRBlock2D()
+  raise Exception("Error: simtype not defined")
+
+
