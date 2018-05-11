@@ -36,13 +36,18 @@ program MDelectron
   !R is for position of the atoms, P = gamma*m*v Momentum, F for Force
   real(8) :: V(3,N)
   !V array used to facilitate the p -> v -> r 
-  real(8) :: PE, KE
+  real(8) :: PE, KE   
+  !PE for potential Energy, KE for kinetic energy
   integer :: Time,i,j,k
-  real(8) :: v2,gamma_i !v2= |v|^2 for calculating gamma
-  integer :: flag(N),tout !flag: entry time for particle, tout for whole bunch
+  real(8) :: v2,gamma_i 
+  !v2= |v|^2 for calculating gamma
+  integer :: flag(N),tout 
+  !flag: entry time for particle, tout: time of the end of photoemission
   integer :: tid,ptr,etime
   integer, dimension(:), allocatable :: emitted
-
+  !emitted is used during the photoemission process for emitted particles at
+  !each timestep, here we are taking the advantage of the input data with sorted
+  !emitted time, so we only need one number to get the job done.
    
 !  open(UNIT=13, file="RandP_3D_Uniform.xyz", status="replace")
   open(UNIT=13, file="RandP_3D_Gaussian.xyz", status="replace")
@@ -72,7 +77,7 @@ program MDelectron
   enddo
   do etime = 1, tout-1
     call position_verlet_emitting(P,R,F,V,dt,emitted(etime))
-!    print *, etime, emitted(etime)
+    !print *, etime, emitted(etime)
     realt = realt + dt
   enddo
   Deallocate(emitted)
@@ -114,9 +119,9 @@ program MDelectron
       dt = 10.0
       print *, 'dt = ', dt
     endif
-    if (Time == 2000) then
-      plotstride = 100
-    endif
+!    if (Time == 2000) then
+!      plotstride = 100
+!    endif
   end do
 
   close(13)
