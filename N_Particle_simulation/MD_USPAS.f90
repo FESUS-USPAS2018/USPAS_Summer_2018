@@ -36,19 +36,51 @@ program MDelectron
   !R is for position of the atoms, P = gamma*m*v Momentum, F for Force
   real(8) :: V(3,N)
   !V array used to facilitate the p -> v -> r 
-  real(8) :: PE, KE
+  real(8) :: PE, KE   
+  !PE for potential Energy, KE for kinetic energy
   integer :: Time,i,j,k
-  real(8) :: v2,gamma_i !v2= |v|^2 for calculating gamma
+  real(8) :: v2,gamma_i 
+  !v2= |v|^2 for calculating gamma
+  integer :: flag(N),tout 
+  !flag: entry time for particle, tout: time of the end of photoemission
+  integer :: tid,ptr,etime
+  integer, dimension(:), allocatable :: emitted
+  !emitted is used during the photoemission process for emitted particles at
+  !each timestep, here we are taking the advantage of the input data with sorted
+  !emitted time, so we only need one number to get the job done.
    
 !  open(UNIT=13, file="RandP_3D_Uniform.xyz", status="replace")
   open(UNIT=13, file="RandP_3D_Gaussian.xyz", status="replace")
+  open(UNIT=11, file="init_xypxpypz.dat", action="read")
    
   !-----Initialization-----
-!  call init_R_Uniform(R,N)
-  call init_R_Gaussian(R,N)
+  call init_R_Uniform(R,N)
+!  call init_R_Gaussian(R,N)
+!  R = 0.0
   P = 0.0
+  call readin_mks(R,P,flag,dt,tout)
   call PtoV(P,V)
   F = 0.0
+  
+  !-----PhotoEmission-----
+  !We are takke the advantage of the fact that the order of input particle number is
+  !sorted by its emission time
+  Allocate(emitted(tout-1))
+  tid = 1
+  do ptr = 1, N
+    if (flag(ptr) > tid) then
+      do i = tid, flag(ptr) - 1
+        emitted(i) = ptr -1
+      enddo
+      tid = flag(ptr)
+    endif
+  enddo
+  do etime = 1, tout-1
+    call position_verlet_emitting(P,R,F,V,dt,emitted(etime))
+    !print *, etime, emitted(etime)
+    realt = realt + dt
+  enddo
+  Deallocate(emitted)
 
   !-----Simulation-----
   do Time=1,Ntime
@@ -75,28 +107,25 @@ program MDelectron
     end if  
     
     !change time step size for better resolution
-    if (Time == 100) then
-      dt = dt * 2.0
-      print *, 'dt = ', dt
-    endif
     if (Time == 200) then
-      dt = 5.0
+      dt = 2.5
       print *, 'dt = ', dt
     endif
     if (Time == 500) then
-      dt = 15.0
+      dt = 5.0
       print *, 'dt = ', dt
     endif
     if (Time == 700) then
-      dt = 50.0
+      dt = 10.0
       print *, 'dt = ', dt
     endif
-    if (Time == 2000) then
-      plotstride = 100
-    endif
+!    if (Time == 2000) then
+!      plotstride = 100
+!    endif
   end do
 
   close(13)
+  close(11)
 
 contains
  
@@ -168,6 +197,34 @@ contains
     enddo
   end subroutine Init_R_Gaussian
 
+  subroutine readin_mks(R,P,flag,dt,tout)
+    real(8), intent(inout) :: P(:,:), R(:,:)
+    integer, intent(inout) :: flag(:),tout   
+    real(8), intent(in) :: dt
+    real(8) :: t,x,y,px,py,pz,t_fs,delta_t,tick_shift
+    real(8) :: m_to_a0 = 1.89E10
+    !for photoemission, p ~ mv
+    !drifting delta_x[a_0] = px*drift_converter*dt = px/m_e[kg]*1.0E-15*m_to_a0,
+    real(8) :: drift_converter = 2.0746E25
+    !momentum converter,p[kg*m/s]*p_converter = p[amu*a0/tau]
+    real(8):: p_converter = 1.175E22
+    integer :: i
+    
+    do i=1,N
+      read(11,*) t,x,y,px,py,pz
+      t_fs = t*1.0E15
+      flag(i) = ceiling(t_fs/dt)
+      delta_t = dt*flag(i) - t_fs
+      R(1,i) = x*m_to_a0 + px*drift_converter
+      R(2,i) = y*m_to_a0 + py*drift_converter
+      R(3,i) = pz*drift_converter
+      P(:,i) = (/px,py,pz/)*p_converter
+    enddo
+    tick_shift = MINVAL(flag) - 1
+    flag = flag - tick_shift
+    tout = MAXVAL(flag)
+  end subroutine readin_mks
+
   subroutine verlet_init(P,R,F,dt)
     real(8), intent(inout) :: P(:,:), R(:,:), F(:,:)
     real(8), intent(in) :: dt
@@ -195,6 +252,28 @@ contains
     R=R+V*hdttt
   end subroutine position_verlet
 
+  subroutine position_verlet_emitting(P,R,F,V,dt,e_num)
+    real(8), intent(inout) :: P(:,:), R(:,:), F(:,:), V(:,:)
+    real(8), intent(in) :: dt
+    integer, intent(in) :: e_num
+    integer :: i
+    real(8) :: hdttt, dttt
+    hdttt = 0.5*dt*tt
+    dttt = dt*tt
+      
+    do i = 1, e_num
+      R(:,i)=R(:,i)+V(:,i)*hdttt
+    enddo
+    call Force_emitting(F,R,e_num)
+    do i = 1, e_num
+      P(:,i)=P(:,i)+F(:,i)*dttt
+    enddo
+    call PtoV_emitting(P,V,e_num)
+    do i = 1, e_num
+      R(:,i)=R(:,i)+V(:,i)*hdttt
+    enddo
+  end subroutine position_verlet_emitting
+
   subroutine PtoV(P,V)
     real(8), intent(in) :: P(:,:)
     real(8), intent(out):: V(:,:)
@@ -211,6 +290,24 @@ contains
       enddo
     enddo
   end subroutine  PtoV
+
+  subroutine PtoV_emitting(P,V,e_num)
+    real(8), intent(in) :: P(:,:)
+    real(8), intent(out):: V(:,:)
+    integer, intent(in) :: e_num
+    integer :: i,j
+    real(8) :: p2,pvc
+    do i = 1, e_num
+      p2 = 0.0
+      do j= 1, 3
+        p2 = p2 + p(j,i)**2
+      enddo
+      pvc = 1.0/(m*sqrt(1+p2/mc2))
+      do j= 1, 3
+        V(j,i) = P(j,i)*pvc
+      enddo
+    enddo
+  end subroutine  PtoV_emitting
 
   !Force Calculation
   subroutine Force(F,R)
@@ -258,6 +355,52 @@ contains
 !    enddo
 
   end subroutine Force
+
+  subroutine Force_emitting(F,R,e_num)
+    real(8), intent(inout) :: F(:,:)
+    real(8), intent(in)   :: R(:,:)
+    integer, intent(in) :: e_num
+    integer :: i,j 
+    real(8) :: REL(3), RELlength, Fij(3), dz_ee
+    real(8) :: zforee !this create a register for R(3,i) to save time
+    F=0.0
+    !$omp parallel do private(fij,rel,Rellength)
+    do j=1,e_num-1
+      do i=j+1,e_num
+        REL=R(:,i)-R(:,j)
+        !REL=REL-nint(Rel/L)*L
+        RELlength=sqrt(sum(REL**2))
+        !FC = 1.0 so we can skip it
+        Fij=(1/(RELlength)**3)*REL
+        !$omp atomic
+        F(1,j)=F(1,j)-Fij(1)
+        !$omp atomic
+        F(2,j)=F(2,j)-Fij(2)
+        !$omp atomic
+        F(3,j)=F(3,j)-Fij(3)
+        !$omp atomic
+        F(1,i)=F(1,i)+Fij(1)
+        !$omp atomic
+        F(2,i)=F(2,i)+Fij(2)
+        !$omp atomic
+        F(3,i)=F(3,i)+Fij(3)
+      end do 
+    end do 
+    !$omp end parallel do
+
+    !the Extraction Field on z-dirction
+!    do i = 1, e_num
+!      zforee = R(3,i)
+!      if ( zforee < z_anode_off) then 
+!        if (zforee < z_anode_on) then
+!          F(3,i) = F(3,i) + E_coeff*EE 
+!        else
+!          dz_ee = (zforee - z_anode)/z_anode_on
+!          F(3,i) = F(3,i) + E_coeff*0.5*EE*(1.0-tanh(5.0*dz_ee))
+!        endif
+!      endif
+!    enddo
+  end subroutine Force_emitting
 
   !get the potential energy of Atomic system
   subroutine getPE(R,N,PE)

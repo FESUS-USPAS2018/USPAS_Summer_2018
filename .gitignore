@@ -6,6 +6,7 @@
 # output files:
 *.xyz
 *.dat
+*.txt
 
 # executables:
 

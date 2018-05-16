@@ -1,3 +1,24 @@
+# Overview
+The intent of the scripts in this directory is to provide additional tools to do standard
+functions with warp.  As most Warp programs are written with global variables
+and in-line function definitions, I have spent considerable effort in creating work-arounds
+that make it clear what variables are necessary for a function while simultaneoulsy
+allowing the functions to be re-usable and modularized.
+
+# Download and "Install"
+
+Download the warp_modules directory to your computer (clone the USPAS_Summer_2018 directory).
+
+Add Warp modules and config2class (also in USPAS_Summer_2018 directory) to your python path with
+
+```
+export PYTHONPATH=$PYTHONPATH:/path/to/warp_modules:/path/to/config2class/src
+```
+
+That's it.  Your python program can now call these modules.  The only thing is that you will need to
+add them to your PYTHONPATH every time you start a new terminal session.
+
+# Additional details
 warp_modules
 Git repository of Warp simulation scripts/tools to model the UEM 
 ultra-intense electron microscope experiment at 
@@ -16,9 +37,7 @@ Michigan State University
 zerbe@msu.edu 
 
 
-To initialize the repository, 
-
-To run the program, add the directory where this readme.txt file is to your 
+To run the program, add the directory where this README file is to your 
 python path:
 
   export PYTHONPATH=$PYTHONPATH:$PWD
