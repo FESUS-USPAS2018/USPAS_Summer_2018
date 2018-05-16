@@ -119,8 +119,8 @@ def electric_potential_plots(ix, iy):
     iy: The index of the center of the mesh in the y direction.
   """
 # --- contour diode field 
-  pcphizx(iy=iy,xscale=1./mm,yscale=1./mm,
-  titlet="Initial (No Beam) ES Potenital Contours in y = 0 Plane",titleb="z [mm]",titlel="x [mm]") 
+  pcphizx(iy=iy,xscale=1.,yscale=1.,
+  titlet="Initial (No Beam) ES Potential Contours in y = 0 Plane",titleb="z [m]",titlel="x [m]") 
   fma() 
 
 # --- plot on axis potential 

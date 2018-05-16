@@ -12,7 +12,7 @@ class ElectronInjector(UserEvent):
   """
 
   def __init__(self, callback, top, filepath,
-               chage_mass_ratio, weight, flags={},**kwargs):
+               chage_mass_ratio, weight, loader=phase_volume_pickle_loader,flags={},**kwargs):
     """
     The init method captures what happens when instance = ElectronInjector()
     is called.  This passes the callback function and the 
@@ -33,7 +33,7 @@ class ElectronInjector(UserEvent):
         the callback function.  This is meant to hold True/False flags.
     """
     self.callback = callback
-    t, x, y, z, px, py, pz = phase_volume_pickle_loader(filepath,**kwargs)
+    t, x, y, z, px, py, pz = loader(filepath,**kwargs)
     self.n = len(x)
     electrons = Species(type=Electron,weight=weight,name="Electron")
     args=[top, t, x, y, z, px, py, pz, chage_mass_ratio, electrons, flags]
