@@ -1,11 +1,20 @@
-import re
 import numpy as np
+import os.path
+import re
 from ConfigParser import *
 
 class MyConfigParser(ConfigParser):
   """
   Extends config parser to do some post processing.
   """
+
+  def read(self,filepath,*args,**kwargs):
+    """
+    Catches the filepath and make sure it exists before passing it on.
+    """
+    if not os.path.isfile(filepath):
+      raise Exception("The configuration file " + str(filepath) + " does not exist.")
+    return ConfigParser.read(self,filepath,*args,**kwargs)
 
   def get(self,section,key):
     """
@@ -135,6 +144,7 @@ def handle_rz_1D_mesh_refinements(config,solver,elements,rmax,**kwargs):
     section_name = k + " refinement"
     print("Adding "+section_name)
     handle_section_named_refinement(config,solver,section_name,rmax,**kwargs)
+  return solver
 
 def handle_section_named_refinement(config,solver,section_name,rmax=None,zmax=None,**kwargs):
   if config.has_section(section_name):
@@ -161,6 +171,7 @@ def handle_section_named_refinement(config,solver,section_name,rmax=None,zmax=No
       add_rz_r_1D_mesh_refinement(solver,mins,maxs,zmax,**kwargs)
     else:
       add_rz_symmetric_1D_mesh_refinement(solver,mins,maxs,**kwargs)
+  return solver
 
 def add_rz_z_1D_mesh_refinement(solver,mins,maxs,rmax,refinement_factor=2,**kwargs):
   """
