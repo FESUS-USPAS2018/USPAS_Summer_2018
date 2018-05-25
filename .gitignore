@@ -2,6 +2,7 @@
 *.o
 *.out
 *.10
+*.pyc
 
 # output files:
 *.xyz
