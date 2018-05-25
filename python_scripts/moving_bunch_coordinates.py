@@ -26,12 +26,12 @@ parser.add_argument('-d','--dist', dest='dist', type=str,
 args = parser.parse_args()
 
 if args.dist == "uniform":
-  phi = 2*np.pi*np.random.uniform(size=args.N)
-  u = np.random.uniform(size=args.N)
+  phi = 2*np.pi*np.random.uniform(size=int(args.N))
+  u = np.random.uniform(size=int(args.N))
   r = args.sigma_r*np.sqrt(u)
   x = r*np.cos(phi)
   y = r*np.sin(phi)
-  z = args.sigma_z*np.random.uniform(size=args.N)
+  z = args.sigma_z*np.random.uniform(size=int(args.N))
 elif args.dist == "Gaussian":
   cov_matrix = np.identity(3)
   cov_matrix[0][0] = args.sigma_r**2
