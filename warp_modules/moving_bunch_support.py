@@ -28,7 +28,7 @@ def moving_bunch_parameters(config,args,top,w3d,f3d,particle_coordinate_file):
   adv_dt = np.array(config.get("Simulation parameters", "adv_dt"))# Numpy array of dts
   adv_steps = np.array(config.get("Simulation parameters", "adv_steps")) #Number of steps for each dt 
   try:
-    adv_dt.size
+    adv_dt[0]
   except:
     adv_dt = np.array([adv_dt])
     adv_steps = np.array([adv_steps])
