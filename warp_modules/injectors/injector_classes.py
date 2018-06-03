@@ -78,7 +78,7 @@ class SingleElectronInjector(UserEvent):
         [x, y, z, px, py, pz, vx, vy, vz] = getdatafromtextfile(filepath,nskip=0,dims=[9,None]) 
       except AssertionError:
         clight = constants.physical_constants["speed of light in vacuum"][0]
-        emass = constants.physical_constants["electron mass energy equivalent in MeV"][0]
+        emass = constants.physical_constants["electron mass"][0]
         [x, y, z, px, py, pz] = getdatafromtextfile(filepath,nskip=0,dims=[6,None]) 
         gamma  = sqrt(1. + (px**2 + py**2 + pz**2)/(emass*clight)**2 )
         gamma_inv = 1./gamma
