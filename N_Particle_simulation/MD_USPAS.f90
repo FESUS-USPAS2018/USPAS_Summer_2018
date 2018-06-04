@@ -16,7 +16,7 @@ program MDelectron
   
   real(8), parameter :: cutoff2 = 400.0 !proximity limit
   integer, parameter :: N=8000, Ntime=10
-  real(8) :: dt=1.0, realt = 0.0
+  real(8) :: dt=5.0, realt = 0.0
   integer :: plotstride = 2
   !experiment: lz = 0.4 um, rx = ry = 100.0 um with 10^6 electrons
   !simulation: lz = 0.08 um, rx = ry = 20.0 um with 8000 electrons
@@ -54,7 +54,7 @@ program MDelectron
   open(UNIT=11, file="init_xypxpypz.dat", action="read")
    
   !-----Initialization-----
-  call init_R_Uniform(R,N)
+!  call init_R_Uniform(R,N)
 !  call init_R_Gaussian(R,N)
 !  R = 0.0
   P = 0.0
@@ -77,7 +77,7 @@ program MDelectron
   enddo
   do etime = 1, tout-1
     call position_verlet_emitting(P,R,F,V,dt,emitted(etime))
-    !print *, etime, emitted(etime)
+    print *, etime, emitted(etime)
     realt = realt + dt
   enddo
   Deallocate(emitted)
