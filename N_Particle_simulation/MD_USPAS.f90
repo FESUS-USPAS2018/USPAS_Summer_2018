@@ -9,15 +9,21 @@ program MDelectron
   real(8), parameter :: Pi=4*atan(1._8)
   real(8), parameter :: tt = 1.03275  !time-factor due to units
   real(8), parameter :: vc =  5.85E3  !speed of light
-  real(8), parameter :: m = 5.4858E-4
-
+  real(8), parameter :: m0 = 5.4858E-4!rest mass of electrons
+  !XXX ms = size of macroparticle
+  real(8), parameter :: ms = 100.0 
+  real(8), parameter :: ms2 = ms*ms !(size_of_macroparticle)^2
+  real(8), parameter :: m = m0*ms!mass of macroparticle
   real(8), parameter :: mc2 = (m*vc)**2 !parameter for P to V
   real(8), parameter :: vc2 = vc**2 !parameter c^2 
   
   real(8), parameter :: cutoff2 = 400.0 !proximity limit
-  integer, parameter :: N=8000, Ntime=10
-  real(8) :: dt=5.0, realt = 0.0
-  integer :: plotstride = 2
+  !XXX N = number of particles, Ntime = iterations
+  integer, parameter :: N=8000, Ntime=5000
+  !XXX dt = timestep size, dt_emit is timestep during emitting process
+  real(8) :: dt_emit = 10.0, dt=100.0, realt = 0.0
+  !XXX plotstride
+  integer :: plotstride = 100
   !experiment: lz = 0.4 um, rx = ry = 100.0 um with 10^6 electrons
   !simulation: lz = 0.08 um, rx = ry = 20.0 um with 8000 electrons
   real(8), parameter :: L = 3.779E5  , Lz = 1511.8
@@ -26,11 +32,10 @@ program MDelectron
   !define the Electronic Field force coefficient in [Hartree/(a_0*electron_charge)]
   !to make F=eE agree with the Force unit
   real(8), parameter :: E_coeff=1.94E-12
-  !Extraction Field in [Volts/meter]
+  !XXX Extraction Field in [Volts/meter]
   real(8), parameter :: EE = 5.0E6  ! for 5MV/m
-  ! z_anode = 2cm to make 100keV electrons
-  real(8), parameter :: z_anode_on = 1.89E8, z_anode_off = 3*z_anode_on
-  real(8), parameter :: z_anode = 2*z_anode_on
+  !XXX z_anode = position of anode 5cm here
+  real(8), parameter :: z_anode = 9.449E8
   
   real(8) :: R(3,N), P(3,N), F(3,N)
   !R is for position of the atoms, P = gamma*m*v Momentum, F for Force
@@ -50,15 +55,18 @@ program MDelectron
   !emitted time, so we only need one number to get the job done.
    
 !  open(UNIT=13, file="RandP_3D_Uniform.xyz", status="replace")
-  open(UNIT=13, file="RandP_3D_Gaussian.xyz", status="replace")
-  open(UNIT=11, file="init_xypxpypz.dat", action="read")
+  !XXX output file name
+  open(UNIT=13, file="three_step_DC_gun.xyz", status="replace")
+  !XXX input file name
+  !open(UNIT=11, file="init_xypxpypz.dat", action="read")
+  open(UNIT=11, file="100e_in.dat", action="read")
    
   !-----Initialization-----
 !  call init_R_Uniform(R,N)
 !  call init_R_Gaussian(R,N)
 !  R = 0.0
-  P = 0.0
-  call readin_mks(R,P,flag,dt,tout)
+!  P = 0.0
+  call readin_mks(R,P,flag,dt_emit,tout)
   call PtoV(P,V)
   F = 0.0
   
@@ -76,9 +84,9 @@ program MDelectron
     endif
   enddo
   do etime = 1, tout-1
-    call position_verlet_emitting(P,R,F,V,dt,emitted(etime))
+    call position_verlet_emitting(P,R,F,V,dt_emit,emitted(etime))
     print *, etime, emitted(etime)
-    realt = realt + dt
+    realt = realt + dt_emit
   enddo
   Deallocate(emitted)
 
@@ -98,27 +106,27 @@ program MDelectron
          KE = KE + 1.0/sqrt(1.0-v2/vc2)
       enddo
       KE = (KE - N)*m*vc2 !KE = (gamma - 1)*m_0*c^2
-      write(*,'(4F15.5)') realt, PE, KE, PE+KE
+      write(*,'(4ES15.5)') realt/1.0E3, PE, KE, PE+KE
       write(13,'(i5)') N
-      write(13,'(F15.5)') realt
+      write(13,'(F15.5)') realt/1.0E3
       do i =1, N
-        write(13,'(i5,3F15.3,3F15.7)') 1,R(:,i),P(:,i)
+        write(13,'(i5,3ES15.5,3ES15.7)') 1,R(:,i),P(:,i)
       end do
     end if  
     
     !change time step size for better resolution
-    if (Time == 200) then
-      dt = 2.5
-      print *, 'dt = ', dt
-    endif
-    if (Time == 500) then
-      dt = 5.0
-      print *, 'dt = ', dt
-    endif
-    if (Time == 700) then
-      dt = 10.0
-      print *, 'dt = ', dt
-    endif
+!    if (Time == 200) then
+!      dt = 2.5
+!      print *, 'dt = ', dt
+!    endif
+!    if (Time == 500) then
+!      dt = 5.0
+!      print *, 'dt = ', dt
+!    endif
+!    if (Time == 700) then
+!      dt = 10.0
+!      print *, 'dt = ', dt
+!    endif
 !    if (Time == 2000) then
 !      plotstride = 100
 !    endif
@@ -205,7 +213,7 @@ contains
     real(8) :: m_to_a0 = 1.89E10
     !for photoemission, p ~ mv
     !drifting delta_x[a_0] = px*drift_converter*dt = px/m_e[kg]*1.0E-15*m_to_a0,
-    real(8) :: drift_converter = 2.0746E25
+    real(8) :: drift_converter = 2.0746E25/ms
     !momentum converter,p[kg*m/s]*p_converter = p[amu*a0/tau]
     real(8):: p_converter = 1.175E22
     integer :: i
@@ -215,9 +223,9 @@ contains
       t_fs = t*1.0E15
       flag(i) = ceiling(t_fs/dt)
       delta_t = dt*flag(i) - t_fs
-      R(1,i) = x*m_to_a0 + px*drift_converter
-      R(2,i) = y*m_to_a0 + py*drift_converter
-      R(3,i) = pz*drift_converter
+      R(1,i) = x*m_to_a0 + px*drift_converter*delta_t
+      R(2,i) = y*m_to_a0 + py*drift_converter*delta_t
+      R(3,i) = pz*drift_converter*delta_t
       P(:,i) = (/px,py,pz/)*p_converter
     enddo
     tick_shift = MINVAL(flag) - 1
@@ -324,7 +332,7 @@ contains
         !REL=REL-nint(Rel/L)*L
         RELlength=sqrt(sum(REL**2))
         !FC = 1.0 so we can skip it
-        Fij=(1/(RELlength)**3)*REL
+        Fij=(1/(RELlength)**3)*REL*ms2
         !$omp atomic
         F(1,j)=F(1,j)-Fij(1)
         !$omp atomic
@@ -344,13 +352,8 @@ contains
     !the Extraction Field on z-dirction
 !    do i = 1, N
 !      zforee = R(3,i)
-!      if ( zforee < z_anode_off) then 
-!        if (zforee < z_anode_on) then
-!          F(3,i) = F(3,i) + E_coeff*EE 
-!        else
-!          dz_ee = (zforee - z_anode)/z_anode_on
-!          F(3,i) = F(3,i) + E_coeff*0.5*EE*(1.0-tanh(5.0*dz_ee))
-!        endif
+!      if ( zforee < z_anode) then 
+!          F(3,i) = F(3,i) + E_coeff*EE*ms 
 !      endif
 !    enddo
 
@@ -371,7 +374,7 @@ contains
         !REL=REL-nint(Rel/L)*L
         RELlength=sqrt(sum(REL**2))
         !FC = 1.0 so we can skip it
-        Fij=(1/(RELlength)**3)*REL
+        Fij=(1/(RELlength)**3)*REL*ms2
         !$omp atomic
         F(1,j)=F(1,j)-Fij(1)
         !$omp atomic
@@ -391,13 +394,8 @@ contains
     !the Extraction Field on z-dirction
 !    do i = 1, e_num
 !      zforee = R(3,i)
-!      if ( zforee < z_anode_off) then 
-!        if (zforee < z_anode_on) then
-!          F(3,i) = F(3,i) + E_coeff*EE 
-!        else
-!          dz_ee = (zforee - z_anode)/z_anode_on
-!          F(3,i) = F(3,i) + E_coeff*0.5*EE*(1.0-tanh(5.0*dz_ee))
-!        endif
+!      if ( zforee < z_anode) then 
+!          F(3,i) = F(3,i) + E_coeff*EE*ms 
 !      endif
 !    enddo
   end subroutine Force_emitting
@@ -418,6 +416,7 @@ contains
       PE = PE + vij
     end do
   end do
+  PE = PE * ms2
   end subroutine getPE
 
 end program MDelectron
